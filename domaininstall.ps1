@@ -2,13 +2,14 @@
 #### Windows PowerShell script for AD DS Deployment ####
 ##############################################
 
-Import-Module ADDSDeployment
+Install-WindowsFeature -name AD-Domain-Services -IncludeManagementTools
+Import-Module ADDSDeployment `
 Install-ADDSForest `
 -CreateDnsDelegation:$false `
 -DatabasePath "C:\Windows\NTDS" `
 -DomainMode "WinThreshold" `
--DomainName "[domain name]" `
--DomainNetbiosName "[netbios name]" `
+-DomainName "[local]" `
+-DomainNetbiosName "[480]" `
 -ForestMode "WinThreshold" `
 -InstallDns:$true `
 -LogPath "C:\Windows\NTDS" `
