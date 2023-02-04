@@ -3,7 +3,6 @@
 ##############################################
 
 Install-WindowsFeature -name AD-Domain-Services -IncludeManagementTools
-Import-Module ADDSDeployment `
 Install-ADDSForest `
 -CreateDnsDelegation:$false `
 -DatabasePath "C:\Windows\NTDS" `
