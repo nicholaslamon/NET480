@@ -9,8 +9,7 @@ Install-ADDSForest `
 -CreateDnsDelegation:$false `
 -DatabasePath "C:\Windows\NTDS" `
 -DomainMode "WinThreshold" `
--DomainName "[local]" `
--DomainNetbiosName "[480]" `
+-DomainName "$DomainName" `
 -ForestMode "WinThreshold" `
 -InstallDns:$true `
 -LogPath "C:\Windows\NTDS" `
