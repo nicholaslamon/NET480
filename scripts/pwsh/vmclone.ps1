@@ -47,7 +47,7 @@ $newvm | new-snapshot -Name "Base"
 cls
 
 Write-Host "----- Cleaning Up -----"
-$linkedvm | Remove-VM -Force
+$linkedvm | Remove-VM -DeletePermanently -Force
 
 cls 
 
