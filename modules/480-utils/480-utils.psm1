@@ -138,7 +138,7 @@ Function Cloner($conf){
         Write-Host  ""
         $datastore = Read-Host -Prompt $msg
 
-        If ($datastore = "y"){
+        If ($datastore = 'y'){
             $datastore = $conf.datastore
         } else {
             Write-Host  ""
@@ -217,13 +217,24 @@ Function PowerSwitch($conf){
     } catch {
 
         $msg = "Invalid format, please select 1-{0}" -f $index-1
-        Write-Host -ForegroundColor Red $msg
+        Write-Host -ForegroundColor DarkRed $msg
     }
 
     $OnOrOff = Read-Host "Would you like to turn that VM on or off? "
 
-        if($OnOrOff -like 'on'){ Start-VM -VM $selected_vm -Confirm:$false -RunAsync }
-        elseif ($OnOrOff -like 'off'){ Stop-VM -VM $selected_vm -Confirm:$false }
+        if($OnOrOff -like 'on'){ 
+            Start-VM -VM $selected_vm -Confirm:$false -RunAsync
+            Write-Host "VM {0} is being turned on." -f $selected_vm.Name
+            Start-Sleep -Seconds 4
+
+        }
+
+        elseif ($OnOrOff -like 'off'){ 
+            Stop-VM -VM $selected_vm -Confirm:$false 
+            Write-Host "VM {0} is being turned off." -f $selected_vm.Name
+            Start-Sleep -Seconds 4
+
+        }
 
     MENU($conf)
 }
