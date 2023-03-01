@@ -1,6 +1,6 @@
 ## TO DO:
 ## Add commenting for each section
-## Increase error handling?
+## Create hashtable for Get-IP function
 
 
 Function 480Banner(){
@@ -32,6 +32,8 @@ Function MENU($conf){
     [2] Cloner
     [3] Connection Test
     [4] Power a VM On/Off
+    [5] Create a New V Network
+    [6] Get System Information
     "
     $selection = Read-Host "Enter an option from above: "
 
@@ -52,7 +54,15 @@ Function MENU($conf){
                     Clear-Host
                     PowerSwitch($conf)
                 }
-                Default {Write-Host "Please select an option 1-4"}
+                '5' {
+                    Clear-Host
+                    New-Network($conf)
+                }
+                '6' {
+                    Clear-Host
+                    Get-IP($conf)
+                }
+                Default {Write-Host "Please select an option 1-6"}
 
             }
 }
@@ -129,7 +139,7 @@ Function Cloner($conf){
 
     try {
         Write-Host ""
-        Get-VM -Location $conf.vm_folder | Select-Object Name -ExpandProperty Name
+        Get-VM -Location $conf.vm_cfolder | Select-Object Name -ExpandProperty Name
         Write-Host  ""
         $toclone = Get-VM -Name (Read-Host -Prompt "Enter a VM you wish to clone: ") -ErrorAction Stop
 
@@ -220,10 +230,51 @@ Function Cloner($conf){
 
 Function New-Network($conf){
 
-    # Creates a new V Switch
-    $switch = New-VirtualSwitch -VMHost $conf.esxi_host -Name(Read-Host "What do you want to name the new Virtual Switch: ") -Confirm:$false
-    
-    # Creates a new V Port Group
-    $vport = New-VirtualPortGroup -VirtualSwitch $switch -Confirm:$false
 
-}
+    try {
+        # Creates a new V Switch
+        $vswitch = New-VirtualSwitch -VMHost $conf.esxi_host -Name (Read-Host "What do you want to name the new Virtual Switch: ")
+            
+        
+        Write-Host "Creating..."
+        $msg = "Created Virtual Switch {0}!" -f $vswitch.Name
+        Write-Host $msg
+
+    
+        try {
+            # Creates a new V Port Group
+            $vport = New-VirtualPortGroup -VirtualSwitch $vswitch  -Name(Read-Host "What do you wish to name the Virtual Port Group: ")
+
+            Write-Host "Creating..."
+            $msg2 = "Created Virtual Port Group {0}!" -f $vport.Name
+            Write-Host $msg2
+
+        } catch {
+
+            Write-Host "Virtual Port Group creation failed, please try again." -ForegroundColor DarkRed
+            Start-Sleep -Seconds 4
+
+        }
+
+        } catch {
+
+            Write-Host "Virtual Switch creation failed, please try again." -ForegroundColor DarkRed
+            Start-Sleep -Seconds 4
+        }
+
+    }
+
+    Function Get-IP($conf){
+
+        Write-Host "What host would you like to get information on?"
+        Get-VM -Location $conf.vm_folder | Select-Object Name -ExpandProperty Name
+        Write-Host ""
+        $vm = Read-Host "Enter hostname from list above: "
+
+        $ip = (Get-VM -Name $vm).Guest.IPAddress[0]
+
+        $mac = Get-NetworkAdapter -VM $vm | Select-Object MacAddress
+        
+        Write-Host $vm $ip $mac
+        
+    }
