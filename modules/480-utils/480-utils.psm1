@@ -52,19 +52,36 @@ Function MENU($conf){
             }
 }
 
-function 480Connect([string] $server){
+function 480Connect($conf){
     $conn = $global:DefaultVIServer
 
     #Are we already connected?
     if($conn){
         $msg = 'Already connected to: {0}' -f $conn
         Write-Host -ForegroundColor Green $msg
-    }else {
-        $conn = Connect-VIserver -Server $server
-        #if this failts let Connect-VIServer handle the exception
-    }
+        Start-Sleep -Seconds 4
 
-    Start-Sleep -Seconds 4
+    }else {
+        
+        
+        try {
+            
+            $conn = Connect-VIserver -Server $conf.vcenter_server
+            #if this failts let Connect-VIServer handle the exception
+            
+            Write-Host "Connecting..."
+            Start-Sleep -Seconds 2
+            Write-Host "Connected!"
+            Start-Sleep -Seconds 4
+    
+        } catch {
+
+            Write-Host "Connection failed, please try again."
+            Start-Sleep -Seconds 4
+
+        }
+    }
+    
     MENU($conf)
 }
 
@@ -109,7 +126,7 @@ Function Cloner($conf){
         Write-Host ""
         Get-VM -Location $conf.vm_folder | Select-Object Name -ExpandProperty Name
         Write-Host  ""
-        $toclone = Get-VM -Name (Read-Host -Prompt "Enter a VM you wish to clone: ")
+        $toclone = Get-VM -Name (Read-Host -Prompt "Enter a VM you wish to clone: ") -ErrorAction Stop
 
         try{
 
