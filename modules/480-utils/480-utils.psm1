@@ -211,3 +211,14 @@ Function Cloner($conf){
     MENU(conf$)
 
 }
+
+
+Function New-Network($conf){
+
+    # Creates a new V Switch
+    $switch = New-VirtualSwitch -VMHost $conf.esxi_host -Name(Read-Host "What do you want to name the new Virtual Switch: ") -Confirm:$false
+    
+    # Creates a new V Port Group
+    $vport = New-VirtualPortGroup -VirtualSwitch $switch -Confirm:$false
+
+}
