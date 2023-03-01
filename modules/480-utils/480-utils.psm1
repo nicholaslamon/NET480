@@ -1,4 +1,9 @@
-function 480Banner(){
+## TO DO:
+## Add commenting for each section
+## Increase error handling?
+
+
+Function 480Banner(){
 
     $banner = @"
  _        _______ _________               ___     _____    _______ 
