@@ -279,12 +279,10 @@ Function Get-IP($conf){
 
     $ip = (Get-VM -Name $vm).Guest.IPAddress[0]
 
-    $mac = Get-NetworkAdapter -VM $vm | Select-Object MacAddress
+    $mac = (Get-NetworkAdapter -VM $vm | Select-Object MacAddress).MacAddress[0]
     
-
-
-    Write-Host $vm $ip $mac
-    MENU($conf)
+    $msg = "$ip hostname=$vm mac=$mac"
+    Write-Host $msg
 }
 
 Function PowerSwitch($conf){
