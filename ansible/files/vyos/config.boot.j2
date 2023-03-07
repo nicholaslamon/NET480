@@ -1,9 +1,9 @@
-interface {
+interfaces {
     ethernet eth0 {
-        address {{ wan_ip}}/24
+        address {{ wan_ip }}/24
     }
     ethernet eth1 {
-        address {{ lan_ip}}/24
+        address {{ lan_ip }}/24
     }
     loopback lo {
 
@@ -46,27 +46,39 @@ system {
     config-management {
         commit-revisions 100
     }
+    conntrack {
+        modules {
+            ftp
+            h323
+            nfs
+            pptp
+            sip
+            sqlnet
+            tftp
+        }
+    }
     console {
         device tty50 {
             speed 115200
         }
     }
-    host-name {{ hostname }}
-    login{
-        user vyos {
-            authentication {
-                encrypted-password {{ password_hash}}
-                plaintest-password ""
-            }
-        }
-    }
     name-server {{ name_server }}
     ntp {
-        server0.pool.ntp.org {
+        server time1.vyos.net {
         }
-        server1.pool.ntp.org {
+        server time2.vyos.net {            
         }
-        server2.pool.ntp.org {
+        server time3.vyos.net {
+        }
+    }
+    syslog {
+        global {
+            facility all {
+                level info
+            }
+            facility protocols {
+                level debug
+            }
         }
     }
 }
