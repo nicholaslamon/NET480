@@ -34,6 +34,7 @@ Function MENU($conf){
     [4] Power a VM On/Off
     [5] Create a New V Network
     [6] Get System Information
+    [7] Set Network Adapter
     "
     $selection = Read-Host "Enter an option from above: "
 
@@ -62,7 +63,11 @@ Function MENU($conf){
                     Clear-Host
                     Get-IP($conf)
                 }
-                Default {Write-Host "Please select an option 1-6"}
+                '7' {
+                    Clear-Host
+                    Set-Network($conf)
+                }
+                Default {Write-Host "Please select an option 1-7"}
 
             }
 }
@@ -110,6 +115,7 @@ function Get-480Config([string] $config_path){
         Write-Host -ForegroundColor Yellow "No configuration done"
     }
     return $conf
+
 }
 
 
@@ -132,7 +138,7 @@ Function Select-VM([string] $folder){
     catch {
         Write-Host "Invalid Folder: $folder" -ForegroundColor Red
     }
-
+    MENU($conf)
 }
 
 Function Cloner($conf){
@@ -223,7 +229,7 @@ Function Cloner($conf){
         Break
     }
 
-    MENU(conf$)
+    MENU($conf)
 
 }
 
@@ -261,20 +267,89 @@ Function New-Network($conf){
             Write-Host "Virtual Switch creation failed, please try again." -ForegroundColor DarkRed
             Start-Sleep -Seconds 4
         }
-
+        MENU($conf)
     }
 
-    Function Get-IP($conf){
+Function Get-IP($conf){
 
-        Write-Host "What host would you like to get information on?"
+    Write-Host "What host would you like to get information on?"
+    Get-VM -Location $conf.vm_folder | Select-Object Name -ExpandProperty Name
+    Write-Host ""
+    $vm = Read-Host "Enter hostname from list above: "
+
+    $ip = (Get-VM -Name $vm).Guest.IPAddress[0]
+
+    $mac = Get-NetworkAdapter -VM $vm | Select-Object MacAddress
+    
+
+
+    Write-Host $vm $ip $mac
+    MENU($conf)
+}
+
+Function PowerSwitch($conf){
+
+    Write-Host "What host would you like to change the power state on?"
+    Write-Host ""
+    Get-VM -Location $conf.vm_folder | Select-Object Name -ExpandProperty Name
+    Write-Host ""
+
+    $vm = Read-Host "Enter hostname from the list above: "
+    Write-Host "Power State: "
+    Get-VM -Name $vm | Select-Object PowerState -ExpandProperty PowerState
+    $power = Read-Host "Would you like to turn that vm on or off? "
+
+    If($power -eq "on"){
+        
+        Start-VM -VM $vm
+        Write-Host "$vm is now on!"
+        Start-Sleep -Seconds 4
+
+    } elseif($power -eq "off"){
+        Stop-VM -VM $vm -Confirm:$false
+        Write-Host "$vm is now off!"
+        Start-Sleep -Seconds 4
+    } else {
+
+        Write-Host "Please select either on or off."
+        PowerSwitch($conf)
+    }
+    MENU($conf)
+}
+
+Function Set-Network ($conf){
+
+
+    try {
+        Write-Host "What VM would you like to change the network adapter on?"
+        Write-Host ""
         Get-VM -Location $conf.vm_folder | Select-Object Name -ExpandProperty Name
         Write-Host ""
-        $vm = Read-Host "Enter hostname from list above: "
 
-        $ip = (Get-VM -Name $vm).Guest.IPAddress[0]
+        $vm = Read-Host "Select a VM from the list above: "
+        Write-Host ""
 
-        $mac = Get-NetworkAdapter -VM $vm | Select-Object MacAddress
-        
-        Write-Host $vm $ip $mac
-        
-    }
+        Get-VirtualNetwork
+        Write-Host ""
+        $network = Read-Host "Select a network from the list above: "
+        Write-Host ""
+
+
+        Get-NetworkAdapter -VM $vm | Select-Object Name -ExpandProperty Name
+        Write-Host ""
+        $netad = Read-Host "Select what network adapter you would like to change: "
+        Write-Host ""
+
+        Write-Host "Configuring."
+        Write-Host "Configuring.."
+        Get-VM $vm | Get-NetworkAdapter -Name $netad| Set-NetworkAdapter -NetworkName $network -Confirm:$false
+    } catch {
+
+        Write-Host "Critical error occurred, seek script creator for solution."
+        Start-Sleep -Seconds 4
+        Write-Host "Actually, nvm, you just stupid..."
+        Start-Sleep -Seconds 1
+       }
+
+    MENU($conf)
+}
