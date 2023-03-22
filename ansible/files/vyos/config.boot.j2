@@ -62,6 +62,15 @@ system {
             speed 115200
         }
     }
+    host-name {{ hostname }}
+    login {
+        user vyos {
+            authentication {
+                encrypted-password {{ password_hash }}
+                plaintext-password ""
+            }
+        }
+    }
     name-server {{ name_server }}
     ntp {
         server time1.vyos.net {
