@@ -1,6 +1,7 @@
 {
     "vcenter_server" : "vcenter.nick.local",
-    "vm_folder" : "BASE-VM",
+    "vm_cfolder" : "BASE-VM",
+    "vm_folder" : "BLUE",
     "esxi_host" : "192.168.7.16",
     "default_network" : "480-wan",
     "datastore" : "datastore2-super6",
