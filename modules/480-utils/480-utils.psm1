@@ -326,12 +326,18 @@ Function Set-Network ($conf){
 
         $vm = Read-Host "Select a VM from the list above: "
         Write-Host ""
+        try {
+            Get-VirtualNetwork
+            Write-Host ""
+            $network = Read-Host "Select a network from the list above: "
+            Write-Host ""
+        } catch {
 
-        Get-VirtualNetwork
-        Write-Host ""
-        $network = Read-Host "Select a network from the list above: "
-        Write-Host ""
-
+            Write-Host "Critical error occurred, seek script creator for solution."
+            Start-Sleep -Seconds 4
+            Write-Host "Actually, nvm, you just stupid..."
+            Start-Sleep -Seconds 1
+           }
 
         Get-NetworkAdapter -VM $vm | Select-Object Name -ExpandProperty Name
         Write-Host ""
