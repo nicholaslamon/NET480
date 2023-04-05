@@ -1,5 +1,5 @@
-- name: rocky config
-  hosts: rocky
+- name: ubuntu config
+  hosts: ubuntu
   tasks:
     - name: create the .ssh directory if it is not there
       file:
@@ -40,18 +40,14 @@
         line: '127.0.1.1 {{ hostname }}'
       become: yes
 
-    - name: run nmcli
-      nmcli:
-        conn_name: "{{ device }}"
-        ip4: "{{ lan_ip }}/24"
-        gw4: "{{ gateway }}"
-        state: present
-        type: ethernet
-        dns4:
-          - "{{ name_server }}"
-          - "{{ gateway }}"
-        method4: manual
+    - name: netplan apply
       become: yes
+      template:
+        src: files/netplan-config.yaml.j2
+        dest: /etc/netplan/00-installer-config.yaml
+        mode: "0644"
+        owner: root
+        group: root
 
     - name: bounce the box
       shell: "sleep 5 && shutdown -r"
