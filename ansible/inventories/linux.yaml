@@ -24,7 +24,6 @@ linux:
           lan_ip: 10.0.5.14
       vars:
         device: ens160
-
   vars:
     public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCsYuuqu7iREXNGlRGhV0HDzmC0oCYjH8/LLN5ySH0TVogDN5IPg4zlH6AkKaodpZIOrnGD6xCrrC+4xYsAPPkOwn4zoYqkC1D9Yx2zBK4XXsIgrZoPSNdgDLkSFOUmuGpMibOyDZPqAOXAwFHvkvbDcXDTSt63CaPNL4FoyXIa5WoMIzu20s63eYSdyZkQf/LDB/YbOrd/EieB/ZabrxO6Wmu+RuWJG5Mat0kGzwfyUfSG+rx11DbbWKLyOqWDfFu/Uzhj+bqNTVoMhEWHQE3jFFvYoNKKIWbMeFO3rRvxCxuALHbvNELzSXSZ/DkvIZGf3zvwC5Jv9PqaQmhHWzFp"
     ansible_user: yennifer

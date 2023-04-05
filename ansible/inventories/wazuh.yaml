@@ -1,0 +1,16 @@
+linux:
+  hosts:
+  children:
+    wazuh_server:
+      hosts:
+        10.0.5.13:
+          hostname: blue-ubun1
+
+    wazuh_client:
+      hosts:
+        10.0.5.82:
+          hostname: blue-xubun
+
+  vars:
+    ansible_user: yennifer
+    wazuh_server: 10.0.5.13
