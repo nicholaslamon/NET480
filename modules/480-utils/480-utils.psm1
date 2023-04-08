@@ -35,6 +35,7 @@ Function MENU($conf){
     [5] Create a New V Network
     [6] Get System Information
     [7] Set Network Adapter
+    [8] Set Windows Configuration
     "
     $selection = Read-Host "Enter an option from above: "
 
@@ -66,6 +67,10 @@ Function MENU($conf){
                 '7' {
                     Clear-Host
                     Set-Network($conf)
+                }
+                '8' {
+                    Clear-Host
+                    SetWindowsConf($conf)
                 }
                 Default {Write-Host "Please select an option 1-7"}
 
@@ -289,12 +294,12 @@ Function PowerSwitch($conf){
 
     Write-Host "What host would you like to change the power state on?"
     Write-Host ""
-    Get-VM -Location $conf.vm_folder | Select-Object Name -ExpandProperty Name
+    Get-VM -Location $conf.vm_folder | Select-Object Name -ExpandProperty Name -ErrorAction Stop
     Write-Host ""
 
     $vm = Read-Host "Enter hostname from the list above: "
     Write-Host "Power State: "
-    Get-VM -Name $vm | Select-Object PowerState -ExpandProperty PowerState
+    Get-VM -Name $vm | Select-Object PowerState -ExpandProperty PowerState 
     $power = Read-Host "Would you like to turn that vm on or off? "
 
     If($power -eq "on"){
@@ -326,18 +331,10 @@ Function Set-Network ($conf){
 
         $vm = Read-Host "Select a VM from the list above: "
         Write-Host ""
-        try {
-            Get-VirtualNetwork
-            Write-Host ""
-            $network = Read-Host "Select a network from the list above: "
-            Write-Host ""
-        } catch {
-
-            Write-Host "Critical error occurred, seek script creator for solution."
-            Start-Sleep -Seconds 4
-            Write-Host "Actually, nvm, you just stupid..."
-            Start-Sleep -Seconds 1
-           }
+        Get-VirtualNetwork
+        Write-Host ""
+        $network = Read-Host "Select a network from the list above: "
+        Write-Host ""
 
         Get-NetworkAdapter -VM $vm | Select-Object Name -ExpandProperty Name
         Write-Host ""
@@ -356,4 +353,43 @@ Function Set-Network ($conf){
        }
 
     MENU($conf)
+}
+
+Function SetWindowsConf($conf){
+    
+    # Select VM
+
+    Write-Host "Select the VM you'd like to change the config of:"
+    Write-Host ""
+    Get-VM -Location $conf.vm_folder | Select-Object Name -ExpandProperty Name
+    Write-Host ""
+    $vm = Read-Host "What VM would you like to change the config on: "
+    Write-Host ""
+
+    # Authentication
+    $user = Read-Host "What user account would you like to authenticate with"
+    $user_pass = Read-Host -AsSecureString "What is that user's password"
+
+    # Gathering info for invoke script
+    Write-Host""
+    Invoke-VMScript -ScriptText "Get-NetAdapter | Select-Object Name" -VM $vm -GuestUser $user -GuestPassword $user_pass
+    Write-Host ""
+    $adapterName = Read-Host "Please enter the name of the network adapter you'd like to use"
+
+    Write-Host ""
+    $ip = Read-Host "What would you like the IP address to be"
+    Write-Host ""
+    $netmask = Read-Host "What would you like the netmask to be"
+    Write-Host ""
+    $gw = Read-Host "What would you like the gateway to be"
+    Write-Host ""
+    $dns = Read-Host "What would you like to set the name server to"
+    Write-Host ""
+
+    $cmd1 = "netsh interface ipv4 set address '$adapterName' static $ip $netmask $gw"
+    $cmd2 = "netsh interface ipv4 add dns '$adapterName' $dns index=1"
+    Invoke-VMScript -ScriptText $cmd1 -VM $vm -GuestUser $user -GuestPassword $user_pass
+    Invoke-VMScript -ScriptText $cmd2 -VM $vm -GuestUser $user -GuestPassword $user_pass
+
+    Start-Sleep -Seconds 3
 }
