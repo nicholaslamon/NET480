@@ -1,0 +1,74 @@
+# Usage: ansible-playbook -i inventories/windows.yaml --ask-pass adds-deployment.yml
+- name: create AD
+  hosts: dc
+  vars_prompt:
+    - name: safe_mode_password
+      prompt: Enter what you want 'safe mode password' to be
+      private: true
+    - name: admin_password
+      prompt: Enter what you want the 'admin password' to be
+      private: true
+  
+  tasks:
+
+# Admin Setup
+  - name: reset admin pw
+    ansible.windows.win_user:
+      name: Administrator
+      password: "{{ admin_password }}"
+      state: present
+
+# Hostname Setup
+  - name: set new hostname
+    ansible.windows.win_hostname:
+      name: "{{ hostname }}"
+    register: reboothostname
+
+  - name: reboot for hostname
+    ansible.windows.win_reboot:
+    when: reboothostname.reboot_required
+
+# AD Features Setup
+  - name: Install  windows AD features
+    ansible.windows.win_feature:
+      name: AD-Domain-Services
+      state: present
+      include_management_tools: yes
+    register: ad_debug
+  - debug:
+      var: ad_debug.exitcode
+
+# Domain Setup
+  - name: create the domain 
+    ansible.windows.win_domain:
+      dns_domain_name: blue1.local
+      safe_mode_password: "{{ safe_mode_password }}"
+      install_dns: true
+    register: domain_debug
+  - debug:
+      var: domain_debug.reboot_required
+  
+  - name: reboot domain
+    ansible.windows.win_reboot:
+    when: domain_debug.reboot_required
+  
+  - name: elevate "{{ ansible_user }}" with domain perms
+    community.windows.win_domain_user:
+      name: "{{ ansible_user }}"
+      state: present
+      groups_action: add
+      groups:
+        - Domain Admins
+        - Enterprise Admins
+  
+# OU Structure
+  - name: copy OU maker.ps1
+    ansible.windows.win_copy:
+      src: files/windows/ou-creation.ps1
+      dest: .\
+
+  - name: run ou-creation.ps1
+    ansible.windows.win_shell: .\ou-creation.ps1
+    register: oucreation
+  - debug:
+      var: oucreation.stdout_lines
